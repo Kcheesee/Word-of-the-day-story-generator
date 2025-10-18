@@ -8,8 +8,16 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
 import anthropic
+import os
 from datetime import datetime
-from config import Wordnik_API_Key, Anthropic_API_Key
+
+# Try to import from config.py (for local development)
+# Fall back to environment variables (for production)
+try:
+    from config import Wordnik_API_Key, Anthropic_API_Key
+except ImportError:
+    Wordnik_API_Key = os.environ.get('WORDNIK_API_KEY')
+    Anthropic_API_Key = os.environ.get('ANTHROPIC_API_KEY')
 
 # Create Flask app
 app = Flask(__name__)
