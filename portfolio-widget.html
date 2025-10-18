@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word of the Day Story Widget</title>
+    <style>
+        .word-story-widget {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .word-story-widget h2 {
+            margin: 0 0 20px 0;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .word-display {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .word-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-transform: capitalize;
+            margin-bottom: 10px;
+        }
+
+        .word-definition {
+            font-size: 16px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .story-container {
+            background: rgba(255,255,255,0.15);
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .error {
+            background: rgba(255,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .generated-time {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 15px;
+            opacity: 0.7;
+        }
+
+        .refresh-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 10px 30px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.5);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<div class="word-story-widget" id="wordWidget">
+    <h2>📚 Word of the Day Story</h2>
+    <div class="loading">Loading today's word...</div>
+</div>
+
+<script>
+    async function loadWordStory() {
+        const widget = document.getElementById('wordWidget');
+
+        try {
+            // Show loading state
+            widget.innerHTML = `
+                <h2>📚 Word of the Day Story</h2>
+                <div class="loading">Loading today's word...</div>
+            `;
+
+            // Call your API
+            const response = await fetch('https://rnadom-storytime-with-claude.onrender.com/api/word-story');
+
+            if (!response.ok) {
+                throw new Error('Failed to load word story');
+            }
+
+            const data = await response.json();
+
+            // Display the word and story
+            widget.innerHTML = `
+                <h2>📚 Word of the Day Story</h2>
+
+                <div class="word-display">
+                    <div class="word-title">${data.word}</div>
+                    <div class="word-definition">${data.definition}</div>
+                </div>
+
+                <div class="story-container">
+                    ${data.story}
+                </div>
+
+                <div class="generated-time">
+                    Generated: ${new Date(data.generated_at).toLocaleString()}
+                </div>
+
+                <button class="refresh-btn" onclick="loadWordStory()">🔄 New Story</button>
+            `;
+
+        } catch (error) {
+            widget.innerHTML = `
+                <h2>📚 Word of the Day Story</h2>
+                <div class="error">
+                    Oops! Couldn't load the story. Please try again later.
+                </div>
+                <button class="refresh-btn" onclick="loadWordStory()">🔄 Retry</button>
+            `;
+            console.error('Error loading word story:', error);
+        }
+    }
+
+    // Load the word story when page loads
+    loadWordStory();
+</script>
+
+</body>
+</html>
