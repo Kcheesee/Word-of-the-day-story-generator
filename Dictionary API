@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Word of the Day Story Generator Fetches word of the day and generates a story using AI."""
+import requests
+import anthropic
+from datetime import datetime
+from config import Wordnik_API_Key, Anthropic_API_Key
+def get_word_of_the_day():
+    """Fetches the word of the day from Wordnik API."""
+    url = "https://api.wordnik.com/v4/words.json/wordOfTheDay"
+
+    # Parameters to send with the request
+    params = {
+        "api_key": Wordnik_API_Key
+    }
+
+    # Make the API request
+    response = requests.get(url, params=params)
+
+    # Parse the JSON response
+    data = response.json()
+
+    # Extract the word and its definition
+    # Wordnik returns the data directly, not nested
+    word = data.get("word", "No word found")
+
+    # Get definition - it might be in 'definitions' or 'note'
+    if "definitions" in data and len(data["definitions"]) > 0:
+        definition = data["definitions"][0]["text"]
+    elif "note" in data:
+        definition = data["note"]
+    else:
+        definition = "No definition available"
+
+    # Return the word and definition
+    return word, definition
+def generate_story(word):
+    """Generate a short story using Claude AI"""
+
+    # Create the Anthropic client
+    client = anthropic.Anthropic(api_key=Anthropic_API_Key)
+
+    # Create a message asking Claude for a story
+    message = client.messages.create(
+        model="claude-sonnet-4-20250514",
+        max_tokens=1024,
+        messages=[
+            {"role": "user", "content": f"Write a short story (about 150 words) that features the word '{word}'. Make it creative and fun!"}
+        ]
+    )
+
+    # Extract the story from the response
+    story = message.content[0].text
+
+    # Return the story
+    return story
+
+def main():
+    """Main function to run the program"""
+
+    print("=== Word of the Day Story Generator ===\n")
+
+    # Get word and definition
+    word, definition = get_word_of_the_day()
+
+    # Display word and definition
+    print(f"Word: {word}")
+    print(f"Definition: {definition}\n")
+
+    print("Generating story...\n")
+
+    # Generate story
+    story= generate_story(word)
+
+    # Display the story
+    print("=== Generated Story ===\n")
+    print(story)
+
+
+# This runs the main function when you run the script
+if __name__ == "__main__":
+    main()
+    
